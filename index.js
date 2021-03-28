@@ -48,7 +48,7 @@ app.post('/[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$', (req, res) => {
   .catch((error) => {
     console.error("Error adding document: ", error);
   });
-  res.redirect(req.headers.referer);
+  req.send(req.body);
 })
 
 //listens to requests at the specified port
