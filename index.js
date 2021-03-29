@@ -41,6 +41,7 @@ app.post('/[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$', (req, res) => {
   keyValues.splice(0,0, ["Time" , currentTime]); // insert key value at the index you want like 1.
   let data = Object.fromEntries(keyValues)
   console.log(data);
+  const start = (new Date()).getTime();
   db.collection("form-data").add(data)
   .then((docRef) => {
     console.log("Document written with ID: ", docRef.id);
@@ -48,6 +49,8 @@ app.post('/[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$', (req, res) => {
   .catch((error) => {
     console.error("Error adding document: ", error);
   });
+  const end = (new Date()).getTime();
+  console.log(end-start);
   res.send(req.body);
 })
 
