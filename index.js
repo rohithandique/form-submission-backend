@@ -7,7 +7,7 @@ const express = require("express");
 const app = express();
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBngblB5yzwv-bdujRpE3icP-wytroYpu0",
+  apiKey: process.env.API_KEY,
   authDomain: "fireform-main.firebaseapp.com",
   projectId: "fireform-main",
   storageBucket: "fireform-main.appspot.com",
