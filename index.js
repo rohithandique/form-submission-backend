@@ -19,6 +19,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
+db.settings({ timestampsInSnapshots: true});
 
 const PORT = process.env.PORT || 5000; //defining port numner
 
@@ -37,10 +38,8 @@ app.get('/', (req, res) => {
 //gets the post body
 app.post('/[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$', (req, res) => {
   
-  const currentTime = new Date();
-  let keyValues = Object.entries(req.body); //convert object to keyValues ["key1", "value1"] ["key2", "value2"]
-  keyValues.splice(0,0, ["Time" , currentTime]); // insert key value at the index you want like 1.
-  let data = Object.fromEntries(keyValues)
+  let data = Object.assign({}, req.body);
+  data.timestamp = firebase.firestore.FieldValue.serverTimestamp();
   console.log(data);
   const start = (new Date()).getTime();
   db.collection("form-data").add(data)
