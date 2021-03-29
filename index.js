@@ -1,3 +1,4 @@
+const startServer = (new Date()).getTime();
 const firebase = require("firebase");
 // Required for side-effects
 require("firebase/firestore");
@@ -50,7 +51,7 @@ app.post('/[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$', (req, res) => {
     console.error("Error adding document: ", error);
   });
   const end = (new Date()).getTime();
-  console.log(end-start);
+  console.log(end-start + "ms to run the Firestore database process");
   res.send(req.body);
 })
 
@@ -58,3 +59,6 @@ app.post('/[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
+
+const endServer = (new Date()).getTime();
+console.log(endServer-startServer+"ms to run the index file and start the server");
