@@ -1,22 +1,26 @@
-const startServer = new Date().getTime();
+//uncomment the following when mailing is required
+//install ejs and sendgrid before that
+/*
+const ejs = require("ejs");
+const sgMail = require('@sendgrid/mail')
+sgMail.setApiKey(process.env.SENDGRID_API_KEY) //api key needs to be added to the .env file
+*/
+
+const startBuild = new Date().getTime(); //to check build time
+
+//importing firebase and firestore
+const firebase = require("firebase");
+require("firebase/firestore");
+//importing express and setting port number
+const express = require("express");
+const app = express();
+const path = require("path");
+const PORT = process.env.PORT || 5000; //defining port number
 
 //get stored environment variables
 require("dotenv").config();
 
-const firebase = require("firebase");
-// Required for side-effects
-require("firebase/firestore");
-
-//importing express, ejs and setting port number
-const express = require("express");
-const app = express();
-const ejs = require("ejs");
-const path = require("path");
-const PORT = process.env.PORT || 5000; //defining port number
-
-//importing nodemailer to send emails
-const nodemailer = require("nodemailer");
-
+//configure firebase
 const firebaseConfig = {
   apiKey: process.env.API_KEY,
   authDomain: "fireform-main.firebaseapp.com",
@@ -25,20 +29,11 @@ const firebaseConfig = {
   messagingSenderId: "978152766887",
   appId: "1:978152766887:web:ec38da29a7cca1f8794a82",
 };
-// Initialize Firebase
+//initialize firebase
 firebase.initializeApp(firebaseConfig);
-
+//initialise firestore and create db object
 const db = firebase.firestore();
 db.settings({ timestampsInSnapshots: true });
-
-//initialise nodemailer
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASSWORD,
-  },
-});
 
 //middleware to handle post body
 app.use(express.json());
@@ -47,28 +42,39 @@ app.use(
     extended: true,
   })
 );
+//added static folder path
+app.use(express.static("public"));
 
+//listening to get requests
 app.get("/", (req, res) => {
-  res.send("<h1>Hello World</h1>");
+  res.send("index.html");
 });
 
 //endpoint for submission
-//takes in a email as the part after forward slash
-//gets the post body
+//takes in an email as the part after forward slash
+//need to change email to a code
 app.post("/[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$", (req, res) => {
-  /*let data = Object.assign({}, req.body);
-  data.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+  let data = Object.assign({}, req.body);
+  data.timestamp = firebase.firestore.FieldValue.serverTimestamp(); //adding timestamp to the data
+  //which is firestores date object
   console.log(data);
-  const start = (new Date()).getTime();
-  db.collection("form-data").add(data)
-  .then((docRef) => {
-    console.log("Document written with ID: ", docRef.id);
-  })
-  .catch((error) => {
-    console.error("Error adding document: ", error);
-  });
-  const end = (new Date()).getTime();
-  console.log(end-start + "ms to run the Firestore database process");*/
+
+  //to check db addition time
+  const startProcess = new Date().getTime();
+  db.collection("form-data")
+    .add(data)
+    .then((docRef) => {
+      console.log("Document written with ID: ", docRef.id);
+    })
+    .catch((error) => {
+      console.error("Error adding document: ", error);
+    });
+  const endProcess = new Date().getTime();
+  console.log(endProcess - startProcess + "ms to add to Firestore"); //to check db addition time
+
+  //uncomment this when mailing function is to be added
+  /*
+  //change items to be req.body
   var items = [
     { name: "node.js", url: "https://nodejs.org/en/" },
     { name: "ejs", url: "https://ejs.co" },
@@ -85,24 +91,31 @@ app.post("/[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$", (req, res) => {
       if (err) {
         console.log(err);
       } else {
-        const mailOptions = {
-          from: process.env.EMAIL, // sender address
-          to: req.url.slice(1, req.url.length), // receiver address (can be a list)
-          subject: "Subject", // Subject line
-          html: data, // html body
+        const msg = {
+          to: "test@example.com", // Change to your recipient
+          from: "test@example.com", // Change to your verified sender
+          subject: "add a subject line",
+          text: "some text if required",
+          html: data, //the ejs template rendered and as a string
         };
-        //console.log("html data ======================>", mailOptions.html);
+        console.log("html data =>", mailOptions.html);
 
-        transporter.sendMail(mailOptions, function (err, info) {
-          if (err) console.log(err);
-          else console.log(info);
-        });
+        sgMail
+          .send(msg)
+          .then((response) => {
+            console.log(response[0].statusCode);
+            console.log(response[0].headers);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
       }
     }
-  );
-  console.log(req.body);
-  res.send(req.body);
-  //res.render("pages\\email.ejs", { email: items });
+  );*/
+  res.send(req.body); //res.redirect(req.headers.origin)
+  //need to change it to add captha and then redirect to original site
+  //original site is at req.headers.origin
 });
 
 //listens to requests at the specified port
@@ -110,7 +123,7 @@ app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
 
-const endServer = new Date().getTime();
+const endBuild = new Date().getTime();
 console.log(
-  endServer - startServer + "ms to run the index file and start the server"
-);
+  endBuild - startBuild + "ms to build the index file and start the server"
+); //to check build time
